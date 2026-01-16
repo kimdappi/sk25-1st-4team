@@ -7,11 +7,10 @@ from streamlit_folium import st_folium
 
 from visualization.gen_age import draw_gender_age_chart
 from visualization.visual import filter_data, draw_chart
-from visualization.visual import draw_gugun_folium_map#, draw_sido_folium_map
+#from visualization.visual import draw_gugun_folium_map#, draw_sido_folium_map
 
 from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showstore
-from utils.recommend import update_database
 
 
 
