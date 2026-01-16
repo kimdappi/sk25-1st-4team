@@ -2,11 +2,16 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
+from streamlit_folium import st_folium
 
+
+from visualization.gen_age import draw_gender_age_chart
 from visualization.visual import filter_data, draw_chart
+#from visualization.visual import draw_gugun_folium_map#, draw_sido_folium_map
+
 from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showstore
-from visualization.gen_age import draw_gender_age_chart
+
 
 
 st.set_page_config(page_title="Car Pick", layout="wide")
@@ -17,6 +22,8 @@ df_long = df
 
 store_df=pd.read_pickle("../data/hyundai_store.pkl")
 genderage_df=pd.read_pickle("../data/성별_연령별_데이터_통합.pkl")
+pkl_path="../data/군_승합_승용.pkl"
+recommend_df=pd.read_pickle("../data/final_filter_data.pkl")
 
 ##============================== URL query param으로 페이지 전환 ==============================##
 # Streamlit 버전에 따라 query_params API가 다를 수 있어서 둘 다 대응
@@ -152,33 +159,33 @@ if "page" not in st.session_state:
 st.sidebar.title("옵션 선택")
 
 # ---- 메뉴 버튼들 ----
-if st.sidebar.button("1. 시도 별 추이", use_container_width=True):
+if st.sidebar.button("시도 별 추이", use_container_width=True):
     st.session_state.page = "sido_trend"
     set_qp({"page": "sido_trend"})
     st.rerun()
 
-if st.sidebar.button("2. 지역 별 추이", use_container_width=True):
+if st.sidebar.button("지역 별 추이", use_container_width=True):
     st.session_state.page = "region_trend"
     set_qp({"page": "region_trend"})
     st.rerun()
 
-if st.sidebar.button("3. 성별 연령 추이", use_container_width=True):
+if st.sidebar.button("성별 연령 추이", use_container_width=True):
     st.session_state.page = "gender_age_trend"
     set_qp({"page": "gender_age_trend"})
     st.rerun()
 
-if st.sidebar.button("4. 필터식 추천", use_container_width=True):
+if st.sidebar.button("필터식 추천", use_container_width=True):
     st.session_state.page = "recommend"
     set_qp({"page": "recommend"})
     st.rerun()
 
-if st.sidebar.button("5. FAQ", use_container_width=True):
+if st.sidebar.button("FAQ", use_container_width=True):
     st.session_state.page = "faq"
     set_qp({"page": "faq"})
     st.rerun()
 
 
-if st.sidebar.button("5. 대리점 정보", use_container_width=True):
+if st.sidebar.button("지점 정보", use_container_width=True):
     st.session_state.page = "carstore"
     set_qp({"page": "carstore"})
     st.rerun()
@@ -222,9 +229,62 @@ if page == "sido_trend":
     
     st.divider()
 
+# elif page == "region_trend":
+#     st.title("지역 별 추이")
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
+    # with col2:
+    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
+
+    # vehicle_type = "car" if kind_kor == "승용차" else "van"
+
+    # # 지도 생성
+    # m = draw_gugun_folium_map(pkl_path, year, vehicle_type)
+
+    # # Streamlit에 folium 출력
+    # st_folium(m, width=1100, height=650)
+
+
 elif page == "region_trend":
     st.title("2) 지역 별 추이")
-    st.info("여기에 2번 화면 코드 넣으면 됨")
+
+    # ===============================
+    # 🔹 메인단 상단 버튼 (지역 단위 선택)
+    # ===============================
+    # col_btn1, col_btn2 = st.columns(2)
+
+    # with col_btn1:
+    #     region_level = st.radio(
+    #         "지역 단위 선택",
+    #         ["도·시", "군·구"],
+    #         horizontal=True
+    #     )
+
+    # # ===============================
+    # # 🔹 필터 영역
+    # # ===============================
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
+    # with col2:
+    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
+
+    # vehicle_type = "car" if kind_kor == "승용차" else "van"
+
+    # # ===============================
+    # # 🔹 지도 분기 처리
+    # # ===============================
+    # if region_level == "도·시":
+    #     m = draw_sido_folium_map(pkl_path, year, vehicle_type)
+    # else:
+    #     m = draw_gugun_folium_map(pkl_path, year, vehicle_type) # 내부 변수 바뀔 수 있음.
+
+    # ===============================
+    # 🔹 Folium 지도 출력 (wide)
+    # ===============================
+    # st_folium(m, width=None, height=650)
+
 
 elif page == "gender_age_trend":
     st.set_page_config(layout="wide")
@@ -235,63 +295,33 @@ elif page == "gender_age_trend":
 
 elif page == "recommend":
     st.title("4) 필터식 추천")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        gender = st.selectbox("성별", ["전체", "남성", "여성"])
+    with c2:
+        age_range = st.selectbox("연령", ["20대", "30대", "40대", "50대", "60대", "70대", "80대"])
+    with c3:
+        car_type = st.selectbox("차종", ["승용", "승합"])
 
-    # 세션 기본값(선택 유지)
-    if "rec_gender" not in st.session_state:
-        st.session_state.rec_gender = "전체"
-    if "rec_age" not in st.session_state:
-        st.session_state.rec_age = "20대"
-    if "rec_kind" not in st.session_state:
-        st.session_state.rec_kind = "승용"
+    # 💡 "선택된 조건" JSON 부분 삭제함
+    st.markdown("---")
 
-    # 상단 한 줄 드랍다운 바
-    with st.container():
-        c1, c2, c3 = st.columns(3)
+    # 3. 결과 출력 (가로 3개 배치)
+    mask = (recommend_df['연령대'] == age_range) & (recommend_df['차종'] == car_type)
+    results = recommend_df[mask].sort_values('순위')
 
-        gender = c1.selectbox(
-            "성별",
-            ["전체", "남", "여"],
-            index=["전체", "남", "여"].index(st.session_state.rec_gender),
-            key="rec_gender_select",
-        )
-
-        age = c2.selectbox(
-            "연령",
-            ["20대", "30대", "40대", "50대", "60대", "70대", "80대"],
-            index=["20대", "30대", "40대", "50대", "60대", "70대", "80대"].index(st.session_state.rec_age),
-            key="rec_age_select",
-        )
-
-        kind = c3.selectbox(
-            "차종",
-            ["승용", "승합"],
-            index=["승용", "승합"].index(st.session_state.rec_kind),
-            key="rec_kind_select",
-        )
-
-    # 선택값을 세션에 반영
-    st.session_state.rec_gender = gender
-    st.session_state.rec_age = age
-    st.session_state.rec_kind = kind
-
-    st.divider()
-
-    #  현재 선택값
-    st.subheader("선택된 조건")
-    st.write({
-        "성별": st.session_state.rec_gender,
-        "연령": st.session_state.rec_age,
-        "차종": st.session_state.rec_kind,
-    })
-
-    # 여기서 추천 로직 연결
-    # gender = st.session_state.rec_gender
-    # age = st.session_state.rec_age
-    # kind = st.session_state.rec_kind
-    #
-    # reco_df = recommend_fn(df_long, gender, age, kind)
-    # st.dataframe(reco_df)
-
+    if not results.empty:
+        st.subheader(f"✨ {age_range} {car_type} 추천 리스트")
+        cols = st.columns(3)
+        for i, (_, row) in enumerate(results.iterrows()):
+            with cols[i]:
+                # 깔끔한 카드 스타일
+                st.success(f"### {row['순위']}위")
+                st.write(f"**{row['제조사']} {row['모델명']}**")
+                st.metric("가격", f"약 {row['가격']}만원")
+                st.info(f"선호 점유율: {row['점유율']}")
+    else:
+        st.warning("추천 데이터를 구성 중입니다.")
 
 elif page == "faq":
     st.title("5) FAQ")
