@@ -4,7 +4,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from visualization.visual import filter_data, draw_chart
-from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
+from data.faq_jh import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showstore
 from visualization.gen_age import draw_gender_age_chart
 
