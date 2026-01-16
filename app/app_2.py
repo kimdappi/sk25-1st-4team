@@ -2,11 +2,16 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
+from streamlit_folium import st_folium
 
+
+from visualization.gen_age import draw_gender_age_chart
 from visualization.visual import filter_data, draw_chart
+from visualization.visual import draw_folium_map
+
 from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showstore
-from visualization.gen_age import draw_gender_age_chart
+
 
 
 st.set_page_config(page_title="Car Pick", layout="wide")
@@ -17,6 +22,7 @@ df_long = df
 
 store_df=pd.read_pickle("../data/hyundai_store.pkl")
 genderage_df=pd.read_pickle("../data/성별_연령별_데이터_통합.pkl")
+pkl_path="./data/군_승합_승용.pkl"
 
 ##============================== URL query param으로 페이지 전환 ==============================##
 # Streamlit 버전에 따라 query_params API가 다를 수 있어서 둘 다 대응
@@ -225,6 +231,23 @@ if page == "sido_trend":
 elif page == "region_trend":
     st.title("2) 지역 별 추이")
     st.info("여기에 2번 화면 코드 넣으면 됨")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
+    with col2:
+        kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
+
+    vehicle_type = "car" if kind_kor == "승용차" else "van"
+
+    # 지도 생성
+    m = draw_folium_map(pkl_path, year, vehicle_type)
+
+    # Streamlit에 folium 출력
+    st_folium(m, width=1100, height=650)
+
+
+
 
 elif page == "gender_age_trend":
     st.set_page_config(layout="wide")
