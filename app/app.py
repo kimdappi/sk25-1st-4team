@@ -188,10 +188,10 @@ if "page" not in st.session_state:
 
 st.sidebar.title("옵션 선택")
 
-# ---- 사이드 바 버튼 선언 ----
+# ---- 메뉴 버튼들 ----c 
 if st.sidebar.button("시간 흐름 별 추이", use_container_width=True):
-    st.session_state.page = " time_trend"
-    set_qp({"page": "time_trend"})
+    st.session_state.page = "sido_trend"
+    set_qp({"page": "sido_trend"})
     st.rerun()
 
 if st.sidebar.button("지역 별 추이", use_container_width=True):
@@ -221,19 +221,20 @@ if st.sidebar.button("지점 정보", use_container_width=True):
     st.rerun()
 st.sidebar.divider()
 
-# 첫 화면 돌아가기 버튼
+# intro로 돌아가기
 if st.sidebar.button("◀ 처음 화면으로", use_container_width=True):
     st.session_state.page = "intro"
     set_qp({"page": "intro"})
     st.rerun()
 
 
+
 # ============================== 페이지별 렌더링 ==============================
 
 page = st.session_state.page
-###==============================[ 사이드 바 ] 시간 흐름 별 추이 출력  ==============================##
+###==============================[ 사이드 바 ] 시간 별 추이 출력  ==============================##
 
-if page == "time_trend":
+if page == "sido_trend":
     st.title("시간 흐름 별 추이")
     col1, col2, col3, col4, col5 = st.columns([1.2, 1.2, 1, 1, 1])
 
@@ -267,6 +268,7 @@ elif page == "region_trend":
     years = [2022, 2023, 2024]
     kind_labels = {"car": "승용(car)", "van": "승합(van)"}
 
+    # ✅ 너 app_2.py에 있는 변수명 그대로 매핑
     car_dfs_by_year = {2022: sidocar_2022, 2023: sidocar_2023, 2024: sidocar_2024}
     van_dfs_by_year = {2022: sidovan_2022, 2023: sidovan_2023, 2024: sidovan_2024}
 
