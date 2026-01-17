@@ -22,11 +22,13 @@ def cached_read_pickle(path: str) -> pd.DataFrame:
     return pd.read_pickle(path)
 
 ## 지도 호출 시 캐싱
-import streamlit as st
-import streamlit.components.v1 as components
 
 @st.cache_data(show_spinner=False)
-def cached_sido_map_html(sido_df: pd.DataFrame, year: int, kind: str) -> str:
+def cached_sido_map_html( year: int, kind: str) -> str:
+    if kind == "car":
+        sido_df = cached_read_pickle(f"../data/sido_category/sidocar_{year}.pkl")
+    else:
+        sido_df = cached_read_pickle(f"../data/sido_category/sidovan_{year}.pkl")
     m = draw_sido_folium_map(sido_df=sido_df, year=year, kind=kind)
     return m.get_root().render()
 
@@ -38,9 +40,8 @@ def cached_gugun_map_html(gugun_df: pd.DataFrame, year: int, vehicle_type: str) 
 ###============================== 데이터 호출 ==============================##
 
 df = cached_read_pickle("../data/자동차등록.pkl")
-df_long = df
+df_long = df.copy()# 메모리 충돌 방지
 
-store_df=cached_read_pickle("../data/hyundai_store.pkl")
 genderage_df=cached_read_pickle("../data/성별_연령별_데이터_통합.pkl")
 gugun_df=cached_read_pickle("../data/군_승합_승용.pkl")
 
@@ -266,7 +267,7 @@ elif page == "region_trend":
     st.title("지역 별 추이")
 
     years = [2022, 2023, 2024]
-    kind_labels = {"car": "승용(car)", "van": "승합(van)"}
+    kind_labels = {"car": "승용", "van": "승합"}
 
     car_dfs_by_year = {2022: sidocar_2022, 2023: sidocar_2023, 2024: sidocar_2024}
     van_dfs_by_year = {2022: sidovan_2022, 2023: sidovan_2023, 2024: sidovan_2024}
@@ -283,8 +284,7 @@ elif page == "region_trend":
 
         sido_df = car_dfs_by_year[year] if kind == "car" else van_dfs_by_year[year]
 
-        # ✅ 캐시된 HTML 렌더
-        html = cached_sido_map_html(sido_df=sido_df, year=year, kind=kind)
+        html = cached_sido_map_html(year=year, kind=kind)
         components.html(html, height=650)
 
     # -------------------------

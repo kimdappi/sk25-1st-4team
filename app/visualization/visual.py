@@ -176,7 +176,78 @@ def draw_sido_folium_map(sido_df, year: int, kind: str = "car"):
         )
     ).add_to(m)
 
+     # -------------------------
+    # 3) kind별 커스텀 레전드(승용/승합 분기)
+    # -------------------------
+
+    if kind == "car":
+    # -------------------------
+        # ✅ 승용차(원본 make_sido_car_map 범례)
+        legend_html = f'''
+        <div style="
+            position: fixed;
+            top: 20px; right: 20px; width: 200px; height: auto;
+            background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+            padding: 10px; border-radius: 10px; opacity: 0.9;
+            ">
+            <b style="font-size:13px;">{year}년 승용차 등록 현황</b><br>
+            <div style="margin-top:8px;">
+                <i style="background:#800026; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 4M ~ 5.6M<br>
+                <i style="background:#BD0026; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 3M ~ 4M<br>
+                <i style="background:#E31A1C; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 2M ~ 3M<br>
+                <i style="background:#FC4E2A; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 1.5M ~ 2M<br>
+                <i style="background:#FD8D3C; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 1.1M ~ 1.5M<br>
+                <i style="background:#FEB24C; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 1M ~ 1.1M<br>
+                <i style="background:#FED976; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 800K ~ 1M<br>
+                <i style="background:#FFEDA0; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 700K ~ 800K<br>
+                <i style="background:#FFFFCC; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 600K ~ 700K<br>
+                <i style="background:#FFFFE5; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 500K ~ 600K<br>
+                <i style="background:#FFF7BC; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 300K ~ 500K<br>
+                <i style="background:#FEE391; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 200K ~ 300K<br>
+                <i style="background:#FEC44F; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 100K ~ 200K<br>
+                <i style="background:#FFFFF7; width:14px; height:14px; float:left; margin-right:8px; border:1px solid #999;"></i> 100K 미만<br>
+            </div>
+            <p style="font-size:10px; margin-top:5px; color:gray; line-height:1.2;">
+                * K=천 단위, M=백만 단위
+            </p>
+        </div>
+        '''
+    else:
+        # ✅ 승합차(원본 make_sido_van_map 범례)
+        legend_html = f'''
+        <div style="
+            position: fixed;
+            top: 20px; right: 20px; width: 180px; height: auto;
+            background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+            padding: 10px; border-radius: 10px; opacity: 0.9;
+            ">
+            <b style="font-size:13px;">{year}년 승합차 등록 현황</b><br>
+            <div style="margin-top:8px; line-height: 1.5;">
+                <i style="background:#800026; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 180K ~ 200K<br>
+                <i style="background:#BD0026; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 150K ~ 180K<br>
+                <i style="background:#E31A1C; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 100K ~ 150K<br>
+                <i style="background:#FC4E2A; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 90K ~ 100K<br>
+                <i style="background:#FD8D3C; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 50K ~ 90K<br>
+                <i style="background:#FEB24C; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 45K ~ 50K<br>
+                <i style="background:#FED976; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 40K ~ 45K<br>
+                <i style="background:#FFEDA0; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 30K ~ 40K<br>
+                <i style="background:#FFFFCC; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 25K ~ 30K<br>
+                <i style="background:#FFFFE5; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 20K ~ 25K<br>
+                <i style="background:#FFF7BC; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 15K ~ 20K<br>
+                <i style="background:#FEE391; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 10K ~ 15K<br>
+                <i style="background:#FFFFF7; width:13px; height:13px; float:left; margin-right:8px; border:1px solid #999;"></i> 10K 미만<br>
+            </div>
+            <p style="font-size:10px; margin-top:5px; color:gray;">* K = 천 단위 (10K = 1만 대)</p>
+        </div>
+        '''
+
+
+
+    m.get_root().html.add_child(folium.Element(legend_html))
+
+
     return m
+
 
 
 def build_sido_maps(dfs_by_year: dict, kind: str):
