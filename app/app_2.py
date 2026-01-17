@@ -6,8 +6,8 @@ from streamlit_folium import st_folium
 
 
 from visualization.gen_age import draw_gender_age_chart
-from visualization.visual import filter_data, draw_chart
-#from visualization.visual import draw_gugun_folium_map#, draw_sido_folium_map
+from visualization.visual import filter_car_regis_data,draw_car_regis_chart
+from visualization.visual import draw_gugun_folium_map, draw_sido_folium_map 
 
 from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showhyundai_store, showkia_store, showgenesis_store
@@ -21,8 +21,39 @@ df_long = df
 
 store_df=pd.read_pickle("../data/hyundai_store.pkl")
 genderage_df=pd.read_pickle("../data/성별_연령별_데이터_통합.pkl")
-pkl_path="../data/군_승합_승용.pkl"
+GUGUN_PKL_PATH="../data/군_승합_승용.pkl"
 recommend_df=pd.read_pickle("../data/final_filter_data.pkl")
+
+sidocar_2022 = pd.read_pickle('../data/sido_category/sidocar_2022.pkl')
+sidocar_2023 = pd.read_pickle('../data/sido_category/sidocar_2023.pkl')
+sidocar_2024 = pd.read_pickle('../data/sido_category/sidocar_2024.pkl')
+sidovan_2022 = pd.read_pickle('../data/sido_category/sidovan_2022.pkl')
+sidovan_2023 = pd.read_pickle('../data/sido_category/sidovan_2023.pkl')
+sidovan_2024 = pd.read_pickle('../data/sido_category/sidovan_2024.pkl')
+
+##============================== 지도 캐시 처리 ==============================##
+
+@st.cache_data(show_spinner=False)
+def cached_read_pickle(path: str) -> pd.DataFrame:
+    return pd.read_pickle(path)
+
+@st.cache_data(show_spinner=False)
+def cached_draw_gugun_map(pkl_path: str, year: int, vehicle_type: str):
+    """
+    외부 함수 draw_gugun_folium_map 호출
+    """
+    # draw_gugun_folium_map 내부에서 pd.read_pickle을 다시 하니까
+    # 캐시 이득을 더 보려면 외부 함수도 full_df를 인자로 받게 리팩토링이 베스트지만,
+    # "외부 함수 그대로" 조건이라 여기서는 호출 캐시만 적용
+    return draw_gugun_folium_map(pkl_path=pkl_path, year=year, vehicle_type=vehicle_type)
+
+@st.cache_data(show_spinner=False)
+def cached_draw_sido_map(year: int, kind: str, sido_df: pd.DataFrame):
+    """
+    외부 함수 draw_sido_folium_map 호출
+    """
+    return draw_sido_folium_map(sido_df=sido_df, year=year, kind=kind)
+
 
 ##============================== URL query param으로 페이지 전환 ==============================##
 # Streamlit 버전에 따라 query_params API가 다를 수 있어서 둘 다 대응
@@ -98,7 +129,7 @@ if st.session_state.page == "intro":
         align-items:center;
         text-align:center;
 
-        /* ✅ 화면 중앙보다 살짝 위로 */
+        /* 화면 중앙보다 살짝 위로 */
         padding-top: 160px;        /* ← 여기 숫자만 조절하면 됨 */
     }
 
@@ -114,7 +145,7 @@ if st.session_state.page == "intro":
         line-height:1.6;
     }
 
-    /* ✅ 버튼을 intro 안에서 예쁘게 */
+    /* 버튼을 intro 안에서 예쁘게 */
     .start-btn-wrap{
         width: 70px;
         margin-top: -200px;
@@ -216,8 +247,8 @@ if page == "sido_trend":
     gubun = col4.selectbox("구분", sorted(df_long["구분"].unique()), key="gubun")
     chart_type = col5.selectbox("차트", ["Line", "Bar"], key="chart_type")
 
-    dff = filter_data(df_long, sido, sigungu, car, gubun)
-    fig = draw_chart(dff, sido, sigungu, car, gubun, chart_type)
+    dff = filter_car_regis_data(df_long, sido, sigungu, car, gubun)
+    fig = draw_car_regis_chart(dff, sido, sigungu, car, gubun, chart_type)
     
     st.plotly_chart(
         fig,
@@ -225,64 +256,46 @@ if page == "sido_trend":
         config={"scrollZoom": True, "displayModeBar": True},
         key=f"main_chart_{sido}_{sigungu}_{car}_{gubun}_{chart_type}"
     )
-    
     st.divider()
 
-# elif page == "region_trend":
-#     st.title("지역 별 추이")
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
-    # with col2:
-    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
-
-    # vehicle_type = "car" if kind_kor == "승용차" else "van"
-
-    # # 지도 생성
-    # m = draw_gugun_folium_map(pkl_path, year, vehicle_type)
-
-    # # Streamlit에 folium 출력
-    # st_folium(m, width=1100, height=650)
 
 
 elif page == "region_trend":
     st.title("2) 지역 별 추이")
 
-    # ===============================
-    # 🔹 메인단 상단 버튼 (지역 단위 선택)
-    # ===============================
-    # col_btn1, col_btn2 = st.columns(2)
+    years = [2022, 2023, 2024]
+    kind_labels = {"car": "승용(car)", "van": "승합(van)"}
 
-    # with col_btn1:
-    #     region_level = st.radio(
-    #         "지역 단위 선택",
-    #         ["도·시", "군·구"],
-    #         horizontal=True
-    #     )
+    # ✅ 너 app_2.py에 있는 변수명 그대로 매핑
+    car_dfs_by_year = {2022: sidocar_2022, 2023: sidocar_2023, 2024: sidocar_2024}
+    van_dfs_by_year = {2022: sidovan_2022, 2023: sidovan_2023, 2024: sidovan_2024}
 
-    # # ===============================
-    # # 🔹 필터 영역
-    # # ===============================
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
-    # with col2:
-    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
+    tab1, tab2 = st.tabs(["시도별 지도", "구 단위 지도"])
 
-    # vehicle_type = "car" if kind_kor == "승용차" else "van"
+    # -------------------------
+    # 1) 시도별 지도 (draw_sido_folium_map)
+    # -------------------------
+    with tab1:
+        c1, c2 = st.columns([1, 1])
+        year = c1.selectbox("연도", years, index=len(years)-1, key="sido_year")
+        kind = c2.selectbox("차종", ["car", "van"], format_func=lambda x: kind_labels[x], key="sido_kind")
 
-    # # ===============================
-    # # 🔹 지도 분기 처리
-    # # ===============================
-    # if region_level == "도·시":
-    #     m = draw_sido_folium_map(pkl_path, year, vehicle_type)
-    # else:
-    #     m = draw_gugun_folium_map(pkl_path, year, vehicle_type) # 내부 변수 바뀔 수 있음.
+        sido_df = car_dfs_by_year[year] if kind == "car" else van_dfs_by_year[year]
 
-    # ===============================
-    # 🔹 Folium 지도 출력 (wide)
-    # ===============================
-    # st_folium(m, width=None, height=650)
+        m = draw_sido_folium_map(sido_df=sido_df, year=year, kind=kind)
+        st_folium(m, width="100%", height=650)
+
+    # -------------------------
+    # 2) 구 단위 지도 (draw_gugun_folium_map)
+    # -------------------------
+    with tab2:
+        c1, c2 = st.columns([1, 1])
+        year = c1.selectbox("연도", years, index=len(years)-1, key="gugun_year")
+        vehicle_type = c2.selectbox("차종", ["car", "van"], format_func=lambda x: kind_labels[x], key="gugun_kind")
+
+        m = draw_gugun_folium_map(pkl_path=GUGUN_PKL_PATH, year=year, vehicle_type=vehicle_type)
+        st_folium(m, width="100%", height=750)
+
 
 
 elif page == "gender_age_trend":
