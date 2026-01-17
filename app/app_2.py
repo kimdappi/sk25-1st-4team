@@ -3,9 +3,11 @@ import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
 
+
+
 from visualization.visual import filter_data, draw_chart
-from data.faq_jh import showgenesisfaq, showhyundaifaq, showkiafaq
-from utils.store import showstore
+from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
+from utils.store import showhyundai_store, showkia_store, showgenesis_store
 from visualization.gen_age import draw_gender_age_chart
 
 
@@ -334,15 +336,55 @@ elif page == "faq":
         showgenesisfaq()
 
 
-
-
-elif page == "carstore": #구현 완료
+# ----------------------------
+# 5) 대리점 정보 (carstore)
+# ----------------------------
+elif page == "carstore":
     st.title("5) 대리점 정보")
+        
+    # ----------------------------
+    # 0) 브랜드 전용 세션 변수
+    # ----------------------------
+    if "store_brand" not in st.session_state:
+        st.session_state.store_brand = "hyundai"
 
-    st.set_page_config(layout="wide")
+    st.subheader("브랜드 선택")
+    c1, c2, c3 = st.columns(3)
 
-    fig = showstore(store_df)
-    st.plotly_chart(fig, use_container_width=True)
+    def brand_button(col, key, label):
+        is_selected = (st.session_state.store_brand == key)
+        # 선택된 브랜드 앞에 ▶ 표시를 붙여 시각적 효과 부여
+        btn_label = f"{'▶ ' if is_selected else ''}{label}"
+        with col:
+            if st.button(btn_label, use_container_width=True, key=f"store_btn_{key}"):
+                st.session_state.store_brand = key
+                st.rerun()
+
+    brand_button(c1, "hyundai", "현대")
+    brand_button(c2, "kia", "기아")
+    brand_button(c3, "genesis", "제네시스")
+
+    st.divider()
+
+    # ----------------------------
+    # 1) 선택 브랜드에 따른 지도 생성 및 출력
+    # ----------------------------
+    brand = st.session_state.store_brand
+
+    # utils/store.py에 정의된 브랜드별 전용 함수를 호출합니다.
+    # 이 함수들은 내부에서 데이터를 필터링하고 색상을 입혀 Figure를 반환합니다.
+    with st.spinner(f"{brand.upper()} 대리점 정보를 불러오는 중..."):
+        if brand == "hyundai":
+            fig = showhyundai_store()
+        elif brand == "kia":
+            fig = showkia_store()
+        elif brand == "genesis":
+            fig = showgenesis_store()
+
+        # 생성된 Plotly 객체 출력
+        st.plotly_chart(fig, use_container_width=True)
+
+#     st.plotly_chart(fig, use_container_width=True)
 
 elif page == "intro":
     st.title("Intro")
