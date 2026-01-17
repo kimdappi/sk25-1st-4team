@@ -6,23 +6,54 @@ from streamlit_folium import st_folium
 
 
 from visualization.gen_age import draw_gender_age_chart
-from visualization.visual import filter_data, draw_chart
-#from visualization.visual import draw_gugun_folium_map#, draw_sido_folium_map
+from visualization.visual import filter_car_regis_data,draw_car_regis_chart
+from visualization.visual import draw_gugun_folium_map, draw_sido_folium_map 
 
 from utils.faq import showgenesisfaq, showhyundaifaq, showkiafaq
 from utils.store import showhyundai_store, showkia_store, showgenesis_store
 
 
 st.set_page_config(page_title="Car Pick", layout="wide")
+##============================== 캐시 처리 ==============================##
+
+## 데이터셋 호출 시 캐싱
+@st.cache_data(show_spinner=False)
+def cached_read_pickle(path: str) -> pd.DataFrame:
+    return pd.read_pickle(path)
+
+## 지도 호출 시 캐싱
+import streamlit as st
+import streamlit.components.v1 as components
+
+@st.cache_data(show_spinner=False)
+def cached_sido_map_html(sido_df: pd.DataFrame, year: int, kind: str) -> str:
+    m = draw_sido_folium_map(sido_df=sido_df, year=year, kind=kind)
+    return m.get_root().render()
+
+@st.cache_data(show_spinner=False)
+def cached_gugun_map_html(gugun_df: pd.DataFrame, year: int, vehicle_type: str) -> str:
+    m = draw_gugun_folium_map(full_df=gugun_df, year=year, vehicle_type=vehicle_type)
+    return m.get_root().render()
 
 ###============================== 데이터 호출 ==============================##
-df = pd.read_pickle("../data/자동차등록.pkl")
+
+df = cached_read_pickle("../data/자동차등록.pkl")
 df_long = df
 
-store_df=pd.read_pickle("../data/hyundai_store.pkl")
-genderage_df=pd.read_pickle("../data/성별_연령별_데이터_통합.pkl")
-pkl_path="../data/군_승합_승용.pkl"
-recommend_df=pd.read_pickle("../data/final_filter_data.pkl")
+store_df=cached_read_pickle("../data/hyundai_store.pkl")
+genderage_df=cached_read_pickle("../data/성별_연령별_데이터_통합.pkl")
+gugun_df=cached_read_pickle("../data/군_승합_승용.pkl")
+
+sidocar_2022 = cached_read_pickle('../data/sido_category/sidocar_2022.pkl')
+sidocar_2023 = cached_read_pickle('../data/sido_category/sidocar_2023.pkl')
+sidocar_2024 = cached_read_pickle('../data/sido_category/sidocar_2024.pkl')
+sidovan_2022 = cached_read_pickle('../data/sido_category/sidovan_2022.pkl')
+sidovan_2023 = cached_read_pickle('../data/sido_category/sidovan_2023.pkl')
+sidovan_2024 = cached_read_pickle('../data/sido_category/sidovan_2024.pkl')
+
+recommend_df=cached_read_pickle("../data/final_filter_data.pkl")
+
+
 
 ##============================== URL query param으로 페이지 전환 ==============================##
 # Streamlit 버전에 따라 query_params API가 다를 수 있어서 둘 다 대응
@@ -98,7 +129,7 @@ if st.session_state.page == "intro":
         align-items:center;
         text-align:center;
 
-        /* ✅ 화면 중앙보다 살짝 위로 */
+        /* 화면 중앙보다 살짝 위로 */
         padding-top: 160px;        /* ← 여기 숫자만 조절하면 됨 */
     }
 
@@ -114,7 +145,7 @@ if st.session_state.page == "intro":
         line-height:1.6;
     }
 
-    /* ✅ 버튼을 intro 안에서 예쁘게 */
+    /* 버튼을 intro 안에서 예쁘게 */
     .start-btn-wrap{
         width: 70px;
         margin-top: -200px;
@@ -157,8 +188,8 @@ if "page" not in st.session_state:
 
 st.sidebar.title("옵션 선택")
 
-# ---- 메뉴 버튼들 ----
-if st.sidebar.button("시도 별 추이", use_container_width=True):
+# ---- 메뉴 버튼들 ----c 
+if st.sidebar.button("시간 흐름 별 추이", use_container_width=True):
     st.session_state.page = "sido_trend"
     set_qp({"page": "sido_trend"})
     st.rerun()
@@ -201,9 +232,10 @@ if st.sidebar.button("◀ 처음 화면으로", use_container_width=True):
 # ============================== 페이지별 렌더링 ==============================
 
 page = st.session_state.page
+###==============================[ 사이드 바 ] 시간 별 추이 출력  ==============================##
 
 if page == "sido_trend":
-    st.title("시도 별 추이")
+    st.title("시간 흐름 별 추이")
     col1, col2, col3, col4, col5 = st.columns([1.2, 1.2, 1, 1, 1])
 
     sido = col1.selectbox("시도명", sorted(df_long["시도명"].unique()), key="sido")
@@ -216,8 +248,8 @@ if page == "sido_trend":
     gubun = col4.selectbox("구분", sorted(df_long["구분"].unique()), key="gubun")
     chart_type = col5.selectbox("차트", ["Line", "Bar"], key="chart_type")
 
-    dff = filter_data(df_long, sido, sigungu, car, gubun)
-    fig = draw_chart(dff, sido, sigungu, car, gubun, chart_type)
+    dff = filter_car_regis_data(df_long, sido, sigungu, car, gubun)
+    fig = draw_car_regis_chart(dff, sido, sigungu, car, gubun, chart_type)
     
     st.plotly_chart(
         fig,
@@ -225,75 +257,62 @@ if page == "sido_trend":
         config={"scrollZoom": True, "displayModeBar": True},
         key=f"main_chart_{sido}_{sigungu}_{car}_{gubun}_{chart_type}"
     )
-    
     st.divider()
 
-# elif page == "region_trend":
-#     st.title("지역 별 추이")
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
-    # with col2:
-    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
 
-    # vehicle_type = "car" if kind_kor == "승용차" else "van"
-
-    # # 지도 생성
-    # m = draw_gugun_folium_map(pkl_path, year, vehicle_type)
-
-    # # Streamlit에 folium 출력
-    # st_folium(m, width=1100, height=650)
-
+###==============================[ 사이드 바 ] 지역 별 추이 출력  ==============================##
 
 elif page == "region_trend":
-    st.title("2) 지역 별 추이")
+    st.title("지역 별 추이")
 
-    # ===============================
-    # 🔹 메인단 상단 버튼 (지역 단위 선택)
-    # ===============================
-    # col_btn1, col_btn2 = st.columns(2)
+    years = [2022, 2023, 2024]
+    kind_labels = {"car": "승용(car)", "van": "승합(van)"}
 
-    # with col_btn1:
-    #     region_level = st.radio(
-    #         "지역 단위 선택",
-    #         ["도·시", "군·구"],
-    #         horizontal=True
-    #     )
+    car_dfs_by_year = {2022: sidocar_2022, 2023: sidocar_2023, 2024: sidocar_2024}
+    van_dfs_by_year = {2022: sidovan_2022, 2023: sidovan_2023, 2024: sidovan_2024}
 
-    # # ===============================
-    # # 🔹 필터 영역
-    # # ===============================
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     year = st.selectbox("연도 선택", [2022, 2023, 2024], index=2)
-    # with col2:
-    #     kind_kor = st.selectbox("차종 선택", ["승용차", "승합차"], index=0)
+    tab1, tab2 = st.tabs(["시도별 지도", "구 단위 지도"])
 
-    # vehicle_type = "car" if kind_kor == "승용차" else "van"
+    # -------------------------
+    # 1) 시도별 지도
+    # -------------------------
+    with tab1:
+        c1, c2 = st.columns([1, 1])
+        year = c1.selectbox("연도", years, index=len(years)-1, key="sido_year")
+        kind = c2.selectbox("차종", ["car", "van"], format_func=lambda x: kind_labels[x], key="sido_kind")
 
-    # # ===============================
-    # # 🔹 지도 분기 처리
-    # # ===============================
-    # if region_level == "도·시":
-    #     m = draw_sido_folium_map(pkl_path, year, vehicle_type)
-    # else:
-    #     m = draw_gugun_folium_map(pkl_path, year, vehicle_type) # 내부 변수 바뀔 수 있음.
+        sido_df = car_dfs_by_year[year] if kind == "car" else van_dfs_by_year[year]
 
-    # ===============================
-    # 🔹 Folium 지도 출력 (wide)
-    # ===============================
-    # st_folium(m, width=None, height=650)
+        # ✅ 캐시된 HTML 렌더
+        html = cached_sido_map_html(sido_df=sido_df, year=year, kind=kind)
+        components.html(html, height=650)
 
+    # -------------------------
+    # 2) 구 단위 지도
+    # -------------------------
+    with tab2:
+        c1, c2 = st.columns([1, 1])
+        year = c1.selectbox("연도", years, index=len(years)-1, key="gugun_year")
+        vehicle_type = c2.selectbox("차종", ["car", "van"], format_func=lambda x: kind_labels[x], key="gugun_kind")
+
+        # ✅ 캐시된 HTML 렌더
+        html = cached_gugun_map_html(gugun_df=gugun_df, year=year, vehicle_type=vehicle_type)
+        components.html(html, height=750)
+
+
+
+###==============================[ 사이드 바 ] 성별 연령 추이 출력  ==============================##
 
 elif page == "gender_age_trend":
     st.set_page_config(layout="wide")
-    st.title("3) 성별 연령 추이")
+    st.title("성별 연령 추이")
     draw_gender_age_chart(genderage_df)
 
+###==============================[ 사이드 바 ]  필더식 추천 출력  ==============================##
 
 
 elif page == "recommend":
-    st.title("4) 필터식 추천")
+    st.title("필터식 추천")
     c1, c2, c3 = st.columns(3)
     with c1:
         gender = st.selectbox("성별", ["전체", "남성", "여성"])
@@ -322,8 +341,10 @@ elif page == "recommend":
     else:
         st.warning("추천 데이터를 구성 중입니다.")
 
+###==============================[ 사이드 바 ]  FAQ 출력  ==============================##
+
 elif page == "faq":
-    st.title("5) FAQ")
+    st.title("FAQ")
 
     # 0) 기본 선택값
     if "faq_brand" not in st.session_state:
@@ -363,12 +384,10 @@ elif page == "faq":
         showgenesisfaq()
 
 
+###==============================[ 사이드 바 ]  지점 정보 출력  ==============================##
+elif page == "carstore": 
+    st.title("지점 정보")
 
-
-elif page == "carstore": #구현 완료
-    st.title("5) 대리점 정보")
-
-   # st.set_page_config(layout="wide")
 
     # ----------------------------
     # 0) 브랜드 전용 세션 변수
@@ -379,15 +398,17 @@ elif page == "carstore": #구현 완료
     st.subheader("브랜드 선택")
     c1, c2, c3 = st.columns(3)
 
-
+    # ----------------------------
+    # 선택된 브랜드 앞에 ▶ 표시를 붙여 시각적 효과 부여하는 함수
+    # ----------------------------
     def brand_button(col, key, label):
         is_selected = (st.session_state.store_brand == key)
-        # 선택된 브랜드 앞에 ▶ 표시를 붙여 시각적 효과 부여
         btn_label = f"{'▶ ' if is_selected else ''}{label}"
         with col:
             if st.button(btn_label, use_container_width=True, key=f"store_btn_{key}"):
                 st.session_state.store_brand = key
                 st.rerun()
+
     brand_button(c1, "hyundai", "현대")
     brand_button(c2, "kia", "기아")
     brand_button(c3, "genesis", "제네시스")
@@ -414,6 +435,7 @@ elif page == "carstore": #구현 완료
         st.plotly_chart(fig, use_container_width=True)
 
 
+###============================== 특정 대시보드 외 페이지 처리 ==============================##
 elif page == "intro":
     st.title("Intro")
     st.info("처음 화면 내용")

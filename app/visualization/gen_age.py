@@ -103,7 +103,7 @@ def draw_gender_age_chart(
         fig = px.scatter(
             df_plot,
             x="연령대",
-            y="비율(%)",                 # ✅ 비율 보기면 y는 비율(%)가 맞게 수정
+            y="비율(%)",                 
             size="자동차등록대수",
             color="성별",
             color_discrete_map=gender_colors,
