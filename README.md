@@ -122,6 +122,9 @@
 </br>
 
 ### Table Specification
+<p align="center"><img src="./assets/table_specification_1.png" width="500"></p> 
+<p align="center"><img src="./assets/table_specification_2.png" width="500"></p> 
+<p align="center"><img src="./assets/table_specification_3.png" width="500"></p> 
 
 
 </br>
