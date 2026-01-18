@@ -160,7 +160,8 @@ SK25-1ST-4TEAM/
 </br>
 
 # 5. 주요 기능 
--> (화면 사진)
+1. 시작 화면
+<p align="center"><img src="./assets/first_page.png" width="500"></p> 
 
 </br>
 
