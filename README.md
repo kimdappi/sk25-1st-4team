@@ -16,7 +16,7 @@ SK25-1ST-4TEAM/
 │   ├── app.py               # 메인 실행 파일 (Streamlit Entry Point)
 │   │
 │   ├── demogr_car/           # 자동차 등록 수 × 인구통계 시각화 모듈
-│   │   ├── gen.age.py        # 연령대 기반 자동차 등록 데이터 생성·가공 함수
+│   │   ├── gen_age.py        # 연령대 기반 자동차 등록 데이터 생성·가공 함수
 │   │   └── visual.py         # 인구통계·자동차 등록 수 시각화 함수 모음
 │   │
 │   └── brand_car/            # 브랜드별 정보 출력 모듈
@@ -31,7 +31,7 @@ SK25-1ST-4TEAM/
 │   ├── carshop_crawling.ipynb
 │   └── genesis_crawling.ipynb
 │
-├── data/                     # 전처리 및 분석에 사용되는 데이터 파일(pkl, csv 등)
+├── data/                     # 전처리 및 분석에 사용되는 데이터 파일(*.pkl)
 │
 ├── preprocessing/            # 데이터 정제·가공 스크립트
 │
