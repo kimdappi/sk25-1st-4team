@@ -9,6 +9,7 @@
 ## ✅ 프로젝트 배경 및 목적
 
 ## 🖐️ 프로젝트 소개
+```
 SK25-1ST-4TEAM/
 │
 ├── app/                     # Streamlit 애플리케이션 핵심 코드
@@ -37,6 +38,7 @@ SK25-1ST-4TEAM/
 ├── README.md                 # 프로젝트 설명 문서
 └── requirements.txt          # Python 패키지 의존성 목록
 
+```
 
 ## ❤️ 기대효과
 
