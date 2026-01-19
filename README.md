@@ -14,16 +14,16 @@
     <th width="20%"><img src="./assets/profile_image/seong.png" width="100"><br><b>박성진</b></th>
   </tr>
   <tr>
-    <td align="center"><b>팀장 / PM</b></td>
-    <td align="center"><b>팀원</b</td>
-    <td align="center"><b>팀원</b></td>
-    <td align="center"><b>팀원</b></td>
-    <td align="center"><b>팀원</b></td>
+    <td align="center"><b>팀장 / PM / Software Engineer</b></td>
+    <td align="center"><b>팀원 / Data Analyst</b</td>
+    <td align="center"><b>팀원 / Data Engineer</b></td>
+    <td align="center"><b>팀원 / DBA</b></td>
+    <td align="center"><b>팀원 / Data Enginner</b></td>
   </tr>
   <tr>
     <td valign="top">
       • <b>Streamlit</b> 최종 구현<br>
-      • <b>Code Integration</b> 총괄<br>
+      • <b>Code Integration</b> <b>GitHub</b> 총괄<br>
       • 제네시스 FAQ & 현대 Agency Crawling<br>
       • 전체 차량 등록 데이터 전처리
     </td>
@@ -33,8 +33,9 @@
       • 발표 전략 수립 및 스크립트 작성
     </td>
     <td valign="top">
-      • 현대·기아 FAQ 데이터 <b>Pipeline</b>,<b>Crawling</b> <br>
+      • 현대·기아 FAQ 데이터 <b>Pipeline includes crawling</b> <br>
       • 텍스트 데이터 정제 및 전처리<br>
+      • FAQ, 대리점 정보 시각화<br>
       • <b>Streamlit</b> 인터페이스 고도화 
     </td>
     <td valign="top">
@@ -185,7 +186,12 @@ SK25-1ST-4TEAM/
 
 # 8. 한줄 회고
 > **김나연** : 여러 기능을 하나의 웹페이지에 구현하기 위해서는 다같이 코드를 작성하기 전 함수명 정의와 변수명 정의가 필요함을 배울 수 있었습니다.  웹 서비스를 제작하는 것은 곧 사용자가 있는 것이므로, 추후 프로젝트 발전 시에는 사용자의 피드백을 통한 기능을 수정하고, 속도를 개선하고 싶습니다. </br>
+
 > **김서현** :  생소했던 파이썬을 처음 다루며 초기에는 많은 시행착오를 겪었으나, 팀원들과 소통하며 데이터 정제의 중요성을 깊이 체감했습니다. 수업에서 배운 이론을 실제 엔진 구축에 적용해보며, 막연했던 코딩이 실질적인 가치로 변하는 과정을 경험한 매우 유익한 시간이었습니다. </br>
-> **김지현** :   </br>
+
+> **김지현** : 데이터 크롤링부터 전처리, Streamlit 출력까지 전 과정을 경험하며 데이터 구조의 통일성이 서비스 구현에 얼마나 중요한지 다시 한번 느낄 수 있었습니다. 또한 팀원분들의 적극적인 소통과 협업 덕분에 짧은 일정 속에서도 프로젝트를 안정적으로 마무리할 수 있었습니다.</br>
+
 > **조민서** :  열정적인 팀원들과의 활봘한 소통과 효율적인 역할 분담 덕분에, 복잡한 데이터 구축 과정을 차질 없이 마칠 수 있었으며, 팀원들과 함께 고민하며 협업의 중요성을 배운 값진 시간이었습니다.   </br>
+
 > **박성진** : 프로그래밍을 처음 배우고 2주정도 지난 시점에서의 팀 프로젝트라 부담감도 컸고 부족했지만 멋진 팀원분들이 잘 이끌어주신 덕분에 저도 성장하고 좋은 결과를 낼 수 있었던 매우 이상적인 협업의 경험이었습니다.  </br>
+
