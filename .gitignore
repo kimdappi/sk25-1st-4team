@@ -1,0 +1,12 @@
+# =====================
+# Jupyter
+# =====================
+.ipynb_checkpoints/
+
+
+# =====================
+# Python cache / bytecode
+# =====================
+__pycache__/
+*.py[cod]
+*$py.class
